@@ -1,137 +1,126 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Mobile menu toggle
     const mobileMenu = document.querySelector('.mobile-menu');
     const navMenu = document.querySelector('nav ul');
-    
-    mobileMenu.addEventListener('click', function() {
+
+    mobileMenu.addEventListener('click', function () {
         navMenu.classList.toggle('active');
     });
-    
+
     // Sidebar toggle
-    const sidebarToggle = document.querySelector('.sidebar-toggle');
     const sidebar = document.querySelector('.sidebar');
-    
-    sidebarToggle.addEventListener('click', function() {
+    const sidebarToggle = document.querySelector('.sidebar-toggle');
+    const mainContent = document.querySelector('.main-content');
+
+    sidebarToggle.addEventListener('click', function () {
         sidebar.classList.toggle('active');
+        mainContent.classList.toggle('shifted');
     });
-    
+
     // Close sidebar when clicking on a link
     const sidebarLinks = document.querySelectorAll('.sidebar-menu a');
     sidebarLinks.forEach(link => {
-        link.addEventListener('click', function() {
+        link.addEventListener('click', function () {
             sidebar.classList.remove('active');
+            mainContent.classList.remove('shifted');
         });
     });
-    
+
+    // Dark/light mode toggle
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeToggleHeader = document.getElementById('theme-toggle-header');
+    const body = document.body;
+
+    function toggleTheme() {
+        body.classList.toggle('dark-mode');
+        const isDarkMode = body.classList.contains('dark-mode');
+        localStorage.setItem('darkMode', isDarkMode);
+
+        // Update icon
+        const icon = themeToggle.querySelector('i');
+        const iconHeader = themeToggleHeader.querySelector('i');
+        if (isDarkMode) {
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+            iconHeader.classList.remove('fa-moon');
+            iconHeader.classList.add('fa-sun');
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        } else {
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+            iconHeader.classList.remove('fa-sun');
+            iconHeader.classList.add('fa-moon');
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        }
+    }
+
+    themeToggle.addEventListener('click', toggleTheme);
+    themeToggleHeader.addEventListener('click', toggleTheme);
+
+    // Check for saved theme preference
+    if (localStorage.getItem('darkMode') === 'true') {
+        body.classList.add('dark-mode');
+        const icon = themeToggle.querySelector('i');
+        const iconHeader = themeToggleHeader.querySelector('i');
+        icon.classList.remove('fa-moon');
+        icon.classList.add('fa-sun');
+        iconHeader.classList.remove('fa-moon');
+        iconHeader.classList.add('fa-sun');
+        themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+    }
+
     // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
+        anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
+
+            const targetId = this.getAttribute('href');
+            const targetElement = document.querySelector(targetId);
+
+            window.scrollTo({
+                top: targetElement.offsetTop - 80,
                 behavior: 'smooth'
             });
-            
+
             // Close mobile menu if open
             navMenu.classList.remove('active');
         });
     });
-    
+
     // Form submission
-    document.getElementById('contactForm').addEventListener('submit', function(e) {
+    document.getElementById('contactForm').addEventListener('submit', function (e) {
         e.preventDefault();
         alert('Thank you for your message! I will get back to you soon.');
         this.reset();
     });
-    
-    // Dark/Light mode toggle
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeToggleHeader = document.getElementById('theme-toggle-header');
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    
-    if (currentTheme === 'dark') {
-        document.body.setAttribute('data-theme', 'dark');
-        themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
-        themeToggleHeader.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-    
-    function toggleTheme() {
-        if (document.body.getAttribute('data-theme') === 'dark') {
-            document.body.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
-            themeToggleHeader.innerHTML = '<i class="fas fa-moon"></i>';
-        } else {
-            document.body.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
-            themeToggleHeader.innerHTML = '<i class="fas fa-sun"></i>';
-        }
-    }
-    
-    if (themeToggle) {
-        themeToggle.addEventListener('click', toggleTheme);
-    }
-    
-    if (themeToggleHeader) {
-        themeToggleHeader.addEventListener('click', toggleTheme);
-    }
-    
-    // Typing animation for hero section
+
+    // Typing animation
     const typingText = document.querySelector('.typing-text');
     const typingDescription = document.querySelector('.typing-description');
-    const texts = ["Naresh Malyavantham", "a Full Stack Web Developer","Python Developer"];
-    const descriptions = [
-        "Recent graduate passionate about developing efficient code and solving complex problems.",
-        "Eager to join a dynamic team where I can contribute my skills in Python and full-stack development.",
-        "Let's build something amazing together!"
-    ];
-    let textIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let isEnd = false;
-    
-    function typeText() {
-        const currentText = texts[textIndex];
-        const currentDescription = descriptions[textIndex];
-        
-        if (isDeleting) {
-            typingText.textContent = currentText.substring(0, charIndex - 1);
-            charIndex--;
-        } else {
-            typingText.textContent = currentText.substring(0, charIndex + 1);
-            charIndex++;
-        }
-        
-        if (!isDeleting && charIndex === currentText.length) {
-            isEnd = true;
-            typingDescription.textContent = currentDescription;
-            setTimeout(() => {
-                isDeleting = true;
-            }, 2000);
-        } else if (isDeleting && charIndex === 0) {
-            isDeleting = false;
-            isEnd = false;
-            textIndex = (textIndex + 1) % texts.length;
-        }
-        
-        const speed = isDeleting ? 50 : isEnd ? 2000 : 150;
-        setTimeout(typeText, speed);
-    }
-    
-    setTimeout(typeText, 1000);
-    
-    // Animate skill bars on scroll
-    function animateSkills() {
-        const skillBars = document.querySelectorAll('.skill-progress');
-        skillBars.forEach(bar => {
-            const width = bar.parentElement.previousElementSibling.lastElementChild.textContent;
-            bar.style.width = width;
+
+    if (typingText) {
+        new Typed(typingText, {
+            strings: ['Naresh Malyavantham', 'a Full Stack Developer', 'a Python Developer'],
+            typeSpeed: 50,
+            backSpeed: 30,
+            loop: true,
+            showCursor: true,
+            cursorChar: '|'
         });
     }
-    
+
+    if (typingDescription) {
+        new Typed(typingDescription, {
+            strings: ['Recent graduate passionate about developing efficient code and solving complex problems.', 'Eager to join a dynamic team where I can contribute my skills in Python and full-stack development.'],
+            typeSpeed: 30,
+            backSpeed: 20,
+            loop: true,
+            showCursor: false
+        });
+    }
+
     // Initialize particles.js
-    if (typeof particlesJS !== 'undefined') {
+    if (document.getElementById('particles-js')) {
         particlesJS('particles-js', {
             particles: {
                 number: {
@@ -238,34 +227,21 @@ document.addEventListener('DOMContentLoaded', function() {
             retina_detect: true
         });
     }
-    
-    // Intersection Observer for scroll animations
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('animate');
-                
-                if (entry.target.classList.contains('skills-container')) {
-                    animateSkills();
-                }
+
+    // Animate elements on scroll
+    const animateOnScroll = () => {
+        const elements = document.querySelectorAll('.skill-progress, .project-card, .education-item, .certification-card');
+
+        elements.forEach(element => {
+            const elementPosition = element.getBoundingClientRect().top;
+            const screenPosition = window.innerHeight / 1.3;
+
+            if (elementPosition < screenPosition) {
+                element.classList.add('animate');
             }
         });
-    }, { threshold: 0.1 });
-    
-    // Observe sections
-    const sectionsToAnimate = document.querySelectorAll('.about-img, .about-text, .skill-category, .experience-item, .project-card, .education-item, .certification-card');
-    sectionsToAnimate.forEach(section => {
-        observer.observe(section);
-    });
-    
-    // Rotate experience cards on hover
-    const experienceItems = document.querySelectorAll('.experience-item');
-    experienceItems.forEach(item => {
-        item.addEventListener('mouseenter', () => {
-            item.style.transform = 'rotate(1deg)';
-        });
-        item.addEventListener('mouseleave', () => {
-            item.style.transform = 'rotate(0)';
-        });
-    });
+    };
+
+    window.addEventListener('scroll', animateOnScroll);
+    animateOnScroll(); // Run once on page load
 });
